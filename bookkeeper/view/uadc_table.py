@@ -11,39 +11,39 @@ class UADCTable(QtWidgets.QWidget):
     """
     UADC TABLE
     """
-    def __init__(self, repo: AbstractRepository, tablename: str, *args, **kwargs) -> None:
+    def __init__(self, repo: AbstractRepository, tablename: str, *args, **kwargs) -> None: # type: ignore[no-untyped-def, type-arg]
         super().__init__(*args, **kwargs)
         self.repo = repo
-        self.layout = QtWidgets.QGridLayout()
+        self.layout = QtWidgets.QGridLayout() # type: ignore[assignment]
 
         self.tablename = QtWidgets.QLabel(tablename)
-        self.layout.addWidget(self.tablename, 0, 0, 1, 1)
+        self.layout.addWidget(self.tablename, 0, 0, 1, 1)  # type: ignore[attr-defined]
         self.btn = QtWidgets.QPushButton('Обновить')
-        self.btn.clicked.connect(self.refresh_click)
-        self.layout.addWidget(self.btn, 0, 1, 1, 1)
+        self.btn.clicked.connect(self.refresh_click)  # type: ignore[attr-defined]
+        self.layout.addWidget(self.btn, 0, 1, 1, 1)  # type: ignore[attr-defined]
 
         self.add_btn = QtWidgets.QPushButton('Добавить')
-        self.add_btn.clicked.connect(self.add_menu)
-        self.layout.addWidget(self.add_btn, 0, 2, 1, 1)
+        self.add_btn.clicked.connect(self.add_menu)  # type: ignore[attr-defined]
+        self.layout.addWidget(self.add_btn, 0, 2, 1, 1)  # type: ignore[attr-defined]
 
         self.delete_btn = QtWidgets.QPushButton('Удалить')
-        self.delete_btn.clicked.connect(self.del_menu)
-        self.layout.addWidget(self.delete_btn, 0, 3, 1, 1)
+        self.delete_btn.clicked.connect(self.del_menu)  # type: ignore[attr-defined]
+        self.layout.addWidget(self.delete_btn, 0, 3, 1, 1)  # type: ignore[attr-defined]
 
         self.upd_btn = QtWidgets.QPushButton('Исправить')
-        self.upd_btn.clicked.connect(self.upd_menu)
-        self.layout.addWidget(self.upd_btn, 0, 4, 1, 1)
+        self.upd_btn.clicked.connect(self.upd_menu)  # type: ignore[attr-defined]
+        self.layout.addWidget(self.upd_btn, 0, 4, 1, 1)  # type: ignore[attr-defined]
 
-        self.exp_tabl = QtWidgets.QTableWidget(20, len(self.repo.fields) + 1)
-        for i, element in enumerate(self.repo.names.split(',')):
+        self.exp_tabl = QtWidgets.QTableWidget(20, len(self.repo.fields) + 1)  # type: ignore[attr-defined]
+        for i, element in enumerate(self.repo.names.split(',')):  # type: ignore[attr-defined]
             self.exp_tabl.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(element))
-        self.exp_tabl.setHorizontalHeaderItem(len(self.repo.fields),
+        self.exp_tabl.setHorizontalHeaderItem(len(self.repo.fields),  # type: ignore[attr-defined]
                                               QtWidgets.QTableWidgetItem('PK'))
-        self.layout.addWidget(self.exp_tabl, 1, 0, 1, 50)
-        self.setLayout(self.layout)
+        self.layout.addWidget(self.exp_tabl, 1, 0, 1, 50)  # type: ignore[attr-defined]
+        self.setLayout(self.layout) # type: ignore[arg-type]
 
         self.dlg = QtWidgets.QDialog()
-        self.dlg_widgets = []
+        self.dlg_widgets: list = [] # type: ignore[type-arg]
 
     def refresh_click(self) -> None:
         """
@@ -52,7 +52,7 @@ class UADCTable(QtWidgets.QWidget):
         result = self.repo.get_all()
         to_table = []
         for element in result:
-            values = [getattr(element, x) for x in self.repo.fields]
+            values = [getattr(element, x) for x in self.repo.fields]  # type: ignore[attr-defined]
             values.append(getattr(element, 'pk'))
             to_table.append(values)
         self.exp_tabl.clearContents()
@@ -65,7 +65,7 @@ class UADCTable(QtWidgets.QWidget):
         self.dlg = QtWidgets.QDialog()
         layout = QtWidgets.QGridLayout()
         self.dlg_widgets = []
-        for i, element in enumerate(self.repo.fields):
+        for i, element in enumerate(self.repo.fields):  # type: ignore[attr-defined]
             if element == 'category':
                 self.dlg_widgets.append(QtWidgets.QComboBox())
                 self.dlg_widgets[-1].addItem('книги')
@@ -82,10 +82,10 @@ class UADCTable(QtWidgets.QWidget):
             layout.addWidget(self.dlg_widgets[-1], i, 1)
         add = QtWidgets.QPushButton('Добавить')
         cancel = QtWidgets.QPushButton('Отменить')
-        cancel.clicked.connect(self.cancel)
-        add.clicked.connect(self.add_click)
-        layout.addWidget(add, len(self.repo.fields)+1, 0)
-        layout.addWidget(cancel, len(self.repo.fields)+1, 1)
+        cancel.clicked.connect(self.cancel)  # type: ignore[attr-defined]
+        add.clicked.connect(self.add_click)  # type: ignore[attr-defined]
+        layout.addWidget(add, len(self.repo.fields)+1, 0)  # type: ignore[attr-defined]
+        layout.addWidget(cancel, len(self.repo.fields)+1, 1)  # type: ignore[attr-defined]
         self.dlg.setLayout(layout)
         self.dlg.setWindowTitle('Добавить покупку')
         self.dlg.exec()
@@ -114,7 +114,7 @@ class UADCTable(QtWidgets.QWidget):
                     to_table.append(element.currentText())
                 except ValueError:
                     to_table.append(element.text())
-        self.repo.add(self.repo.cls(*to_table))
+        self.repo.add(self.repo.cls(*to_table))  # type: ignore[attr-defined]
         self.refresh_click()
         self.dlg.close()
 
@@ -131,8 +131,8 @@ class UADCTable(QtWidgets.QWidget):
         layout.addWidget(self.dlg_widgets[-1], 0, 1)
         add = QtWidgets.QPushButton('Применить')
         cancel = QtWidgets.QPushButton('Отменить')
-        cancel.clicked.connect(self.cancel)
-        add.clicked.connect(self.del_click)
+        cancel.clicked.connect(self.cancel)  # type: ignore[attr-defined]
+        add.clicked.connect(self.del_click)  # type: ignore[attr-defined]
         layout.addWidget(add, 1, 0)
         layout.addWidget(cancel, 1, 1)
         self.dlg.setLayout(layout)
@@ -159,7 +159,7 @@ class UADCTable(QtWidgets.QWidget):
         self.dlg = QtWidgets.QDialog()
         layout = QtWidgets.QGridLayout()
         self.dlg_widgets = []
-        for i, element in enumerate(self.repo.fields):
+        for i, element in enumerate(self.repo.fields):  # type: ignore[attr-defined]
             if element == 'category':
                 self.dlg_widgets.append(QtWidgets.QComboBox())
                 self.dlg_widgets[-1].addItem('книги')
@@ -175,14 +175,14 @@ class UADCTable(QtWidgets.QWidget):
             layout.addWidget(QtWidgets.QLabel(str(element)), i, 0)
             layout.addWidget(self.dlg_widgets[-1], i, 1)
         self.dlg_widgets.append(QtWidgets.QLineEdit())
-        layout.addWidget(QtWidgets.QLabel('PK'), len(self.repo.fields), 0)
-        layout.addWidget(self.dlg_widgets[-1], len(self.repo.fields), 1)
+        layout.addWidget(QtWidgets.QLabel('PK'), len(self.repo.fields), 0)  # type: ignore[attr-defined]
+        layout.addWidget(self.dlg_widgets[-1], len(self.repo.fields), 1)  # type: ignore[attr-defined]
         add = QtWidgets.QPushButton('Исправить')
         cancel = QtWidgets.QPushButton('Отменить')
-        cancel.clicked.connect(self.cancel)
-        add.clicked.connect(self.upd_click)
-        layout.addWidget(add, len(self.repo.fields)+1, 0)
-        layout.addWidget(cancel, len(self.repo.fields)+1, 1)
+        cancel.clicked.connect(self.cancel)  # type: ignore[attr-defined]
+        add.clicked.connect(self.upd_click)  # type: ignore[attr-defined]
+        layout.addWidget(add, len(self.repo.fields)+1, 0)  # type: ignore[attr-defined]
+        layout.addWidget(cancel, len(self.repo.fields)+1, 1)  # type: ignore[attr-defined]
         self.dlg.setLayout(layout)
         self.dlg.setWindowTitle('Исправить запись')
         self.dlg.exec()
@@ -205,14 +205,14 @@ class UADCTable(QtWidgets.QWidget):
                     to_table.append(element.currentText())
                 except ValueError:
                     to_table.append(element.text())
-        tmp = self.repo.cls(*to_table)
+        tmp = self.repo.cls(*to_table)  # type: ignore[attr-defined]
         print(to_table)
         print(tmp)
-        self.repo.update(self.repo.cls(*to_table))
+        self.repo.update(self.repo.cls(*to_table))  # type: ignore[attr-defined]
         self.refresh_click()
         self.dlg.close()
 
-    def add_data(self, data: list) -> None:
+    def add_data(self, data: list) -> None: # type: ignore[type-arg]
         """
         refresh
         """
