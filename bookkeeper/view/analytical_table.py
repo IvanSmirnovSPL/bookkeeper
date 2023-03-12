@@ -12,13 +12,16 @@ class AnalyticalTable(QtWidgets.QWidget):
     """
     Brilliant analytical table
     """
-    def __init__(self, area_repo: AbstractRepository[Budget], # type: ignore[no-untyped-def]
-                 study_repo: AbstractRepository[Expense],
-                 tname: str, *args, **kwargs) -> None:
+
+    def __init__(  # type: ignore[no-untyped-def]
+            self,
+            area_repo: AbstractRepository[Budget],
+            study_repo: AbstractRepository[Expense],
+            tname: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.study_repo = study_repo
         self.area_repo = area_repo
-        self.layout = QtWidgets.QVBoxLayout() # type: ignore[assignment]
+        self.layout = QtWidgets.QVBoxLayout()  # type: ignore[assignment]
         #  budget table
         self.table = UADCTable(area_repo, tname)
         self.layout.addWidget(self.table)  # type: ignore[attr-defined]

@@ -11,10 +11,16 @@ class UADCTable(QtWidgets.QWidget):
     """
     UADC TABLE
     """
-    def __init__(self, repo: AbstractRepository, tablename: str, *args, **kwargs) -> None: # type: ignore[no-untyped-def, type-arg]
+
+    def __init__(  # type: ignore[no-untyped-def]
+            self,
+            repo: AbstractRepository,  # type: ignore[type-arg]
+            tablename: str,
+            *args,
+            **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.repo = repo
-        self.layout = QtWidgets.QGridLayout() # type: ignore[assignment]
+        self.layout = QtWidgets.QGridLayout()  # type: ignore[assignment]
 
         self.tablename = QtWidgets.QLabel(tablename)
         self.layout.addWidget(self.tablename, 0, 0, 1, 1)  # type: ignore[attr-defined]
@@ -34,16 +40,22 @@ class UADCTable(QtWidgets.QWidget):
         self.upd_btn.clicked.connect(self.upd_menu)  # type: ignore[attr-defined]
         self.layout.addWidget(self.upd_btn, 0, 4, 1, 1)  # type: ignore[attr-defined]
 
-        self.exp_tabl = QtWidgets.QTableWidget(20, len(self.repo.fields) + 1)  # type: ignore[attr-defined]
-        for i, element in enumerate(self.repo.names.split(',')):  # type: ignore[attr-defined]
+        self.exp_tabl = QtWidgets.QTableWidget(
+            20,
+            len(self.repo.fields) + 1)  # type: ignore[attr-defined]
+        for i, element in enumerate(
+                self.repo.names.split(',')  # type: ignore[attr-defined]
+        ):
             self.exp_tabl.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(element))
-        self.exp_tabl.setHorizontalHeaderItem(len(self.repo.fields),  # type: ignore[attr-defined]
-                                              QtWidgets.QTableWidgetItem('PK'))
+        self.exp_tabl.setHorizontalHeaderItem(
+            len(self.repo.fields),  # type: ignore[attr-defined]
+            QtWidgets.QTableWidgetItem('PK')
+        )
         self.layout.addWidget(self.exp_tabl, 1, 0, 1, 50)  # type: ignore[attr-defined]
-        self.setLayout(self.layout) # type: ignore[arg-type]
+        self.setLayout(self.layout)  # type: ignore[arg-type]
 
         self.dlg = QtWidgets.QDialog()
-        self.dlg_widgets: list = [] # type: ignore[type-arg]
+        self.dlg_widgets: list = []  # type: ignore[type-arg]
 
     def refresh_click(self) -> None:
         """
@@ -52,7 +64,8 @@ class UADCTable(QtWidgets.QWidget):
         result = self.repo.get_all()
         to_table = []
         for element in result:
-            values = [getattr(element, x) for x in self.repo.fields]  # type: ignore[attr-defined]
+            values = [getattr(element, x)
+                      for x in self.repo.fields]  # type: ignore[attr-defined]
             values.append(getattr(element, 'pk'))
             to_table.append(values)
         self.exp_tabl.clearContents()
@@ -84,8 +97,9 @@ class UADCTable(QtWidgets.QWidget):
         cancel = QtWidgets.QPushButton('Отменить')
         cancel.clicked.connect(self.cancel)  # type: ignore[attr-defined]
         add.clicked.connect(self.add_click)  # type: ignore[attr-defined]
-        layout.addWidget(add, len(self.repo.fields)+1, 0)  # type: ignore[attr-defined]
-        layout.addWidget(cancel, len(self.repo.fields)+1, 1)  # type: ignore[attr-defined]
+        layout.addWidget(add, len(self.repo.fields) + 1, 0)  # type: ignore[attr-defined]
+        layout.addWidget(cancel,
+                         len(self.repo.fields) + 1, 1)  # type: ignore[attr-defined]
         self.dlg.setLayout(layout)
         self.dlg.setWindowTitle('Добавить покупку')
         self.dlg.exec()
@@ -175,14 +189,17 @@ class UADCTable(QtWidgets.QWidget):
             layout.addWidget(QtWidgets.QLabel(str(element)), i, 0)
             layout.addWidget(self.dlg_widgets[-1], i, 1)
         self.dlg_widgets.append(QtWidgets.QLineEdit())
-        layout.addWidget(QtWidgets.QLabel('PK'), len(self.repo.fields), 0)  # type: ignore[attr-defined]
-        layout.addWidget(self.dlg_widgets[-1], len(self.repo.fields), 1)  # type: ignore[attr-defined]
+        layout.addWidget(QtWidgets.QLabel('PK'),
+                         len(self.repo.fields), 0)  # type: ignore[attr-defined]
+        layout.addWidget(self.dlg_widgets[-1],
+                         len(self.repo.fields), 1)  # type: ignore[attr-defined]
         add = QtWidgets.QPushButton('Исправить')
         cancel = QtWidgets.QPushButton('Отменить')
         cancel.clicked.connect(self.cancel)  # type: ignore[attr-defined]
         add.clicked.connect(self.upd_click)  # type: ignore[attr-defined]
-        layout.addWidget(add, len(self.repo.fields)+1, 0)  # type: ignore[attr-defined]
-        layout.addWidget(cancel, len(self.repo.fields)+1, 1)  # type: ignore[attr-defined]
+        layout.addWidget(add, len(self.repo.fields) + 1, 0)  # type: ignore[attr-defined]
+        layout.addWidget(cancel,
+                         len(self.repo.fields) + 1, 1)  # type: ignore[attr-defined]
         self.dlg.setLayout(layout)
         self.dlg.setWindowTitle('Исправить запись')
         self.dlg.exec()
@@ -212,7 +229,7 @@ class UADCTable(QtWidgets.QWidget):
         self.refresh_click()
         self.dlg.close()
 
-    def add_data(self, data: list) -> None: # type: ignore[type-arg]
+    def add_data(self, data: list) -> None:  # type: ignore[type-arg]
         """
         refresh
         """
