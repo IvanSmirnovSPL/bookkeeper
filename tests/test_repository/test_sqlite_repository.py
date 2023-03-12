@@ -1,117 +1,72 @@
-import pytest
-import sqlite3
+from bookkeeper.repository.sqlite_repository import SQLiteRepository
+from inspect import get_annotations
+
 from dataclasses import dataclass
 
-from bookkeeper.repository.sqlite_repository import SQLiteRepository
+import pytest
 
-DB_FILE = "database/test_sqlrepo.db"
-
-@pytest.fixture
-def create_bd():
-    with sqlite3.connect(DB_FILE) as con:
-        cur = con.cursor()
-        cur.execute(f"DROP TABLE custom")
-    with sqlite3.connect(DB_FILE) as con:
-        cur = con.cursor()
-        cur.execute(f"CREATE TABLE custom(f1, f2)")
-    con.close()
-
+@dataclass(slots=True)
+class Custom():
+    comment: str = 'Hi!'
+    name: str = 'Marcus Aurelius'
+    one: int = 1
+    test: str = ''
+    pk: int | None = None
+    
 
 @pytest.fixture
-def custom_class():
-    @dataclass
-    class Custom():
-        f1: int
-        f2: str = "f2_value"
-        pk: int = 0
-    return Custom
+def repo():
+    return SQLiteRepository('TEST_REPO_DONT_USE.db', Custom)
 
-
-@pytest.fixture
-def repo(custom_class, create_bd):
-    return SQLiteRepository(db_file=DB_FILE, cls=custom_class)
-
-
-def test_row2obj(repo):
-    row = (11, "test_row2obj")
-    obj = repo._row2obj(10, row)
-    assert obj.pk == 10
-    assert obj.f1 == 11
-    assert obj.f2 == "test_row2obj"
-
-
-def test_crud(repo, custom_class):
-    # create
-    obj_add = custom_class(f1=1, f2="test_crud")
-    pk = repo.add(obj_add)
-    assert pk == obj_add.pk
-    # read
-    obj_get = repo.get(pk)
-    assert obj_get is not None
-    assert obj_get.pk == obj_add.pk
-    assert obj_get.f1 == obj_add.f1
-    assert obj_get.f2 == obj_add.f2
-    # update
-    obj_upd = custom_class(f1=11, f2="test_crud_upd", pk=pk)
-    repo.update(obj_upd)
-    obj_get = repo.get(pk)
-    assert obj_get.pk == obj_upd.pk
-    assert obj_get.f1 == obj_upd.f1
-    assert obj_get.f2 == obj_upd.f2
-    # delete
-    repo.delete(pk)
-    assert repo.get(pk) is None
-
-
-def test_cannot_add_with_pk(repo, custom_class):
-    obj = custom_class(f1=1, pk=1)
-    with pytest.raises(ValueError):
-        repo.add(obj)
-
-
-def test_cannot_add_without_pk(repo):
-    with pytest.raises(ValueError):
-        repo.add(0)
-
-
-def test_cannot_update_unexistent(repo, custom_class):
-    obj = custom_class(f1=1, pk=100)
-    with pytest.raises(ValueError):
-        repo.update(obj)
-
-
-def test_cannot_update_without_pk(repo, custom_class):
-    obj = custom_class(f1=1, pk=0)
-    with pytest.raises(ValueError):
-        repo.update(obj)
-
-
-def test_get_unexistent(repo):
-    assert repo.get(-1) is None
-
+def test_crud(repo):
+    repo.delete_all()
+    obj1 = Custom('Hello', pk = 1)
+    pk1 = repo.add(obj1)
+    obj2 = Custom('Hi', pk = 2)
+    pk2 = repo.add(obj2)
+    assert obj1 == repo.get(pk1) # saves correctly
+    assert obj2 == repo.get(pk2) # saves correctly
+    assert obj1 != repo.get(pk2) # different keys
+    assert obj2 != repo.get(pk1) # really different keys
+    obj_buff = obj1
+    obj2.pk = obj1.pk
+    repo.update(obj2)
+    assert repo.get(pk1) != obj_buff # the recording really changed
+    assert repo.get(pk1) == obj2 # changed for the new version
+    repo.delete(pk2)
+    assert repo.get(pk2) is None
 
 def test_cannot_delete_unexistent(repo):
-    with pytest.raises(ValueError):
-        repo.delete(-1)
+    with pytest.raises(KeyError):
+        repo.delete(1000)
 
+def test_cannot_update_without_pk(repo):
+    obj = Custom()
+    print(obj)
+    with pytest.raises(TypeError):
+        repo.update(obj)
 
-def test_get_all(repo, custom_class):
-    objects = [custom_class(f1=1) for i in range(5)]
+def test_get_all(repo):
+    data_size = 5 
+    repo.delete_all()
+    objects = [Custom(pk = i+1) for i in range(data_size)]
     for o in objects:
         repo.add(o)
-    objects_pk = [o.pk for o in objects]
-    objects_get_pk = [o.pk for o in repo.get_all()]
-    assert objects_pk == objects_get_pk
+    all = repo.get_all()
+    for i in range(data_size):
+        assert all[i] == objects[i]
 
-def test_get_all_with_condition(repo, custom_class):
+def test_get_all_with_condition(repo):
+    data_size = 5
+    repo.delete_all()
     objects = []
-    for i in range(5):
-        o = custom_class(f1=1)
-        o.f1 = i
-        o.f2 = 'test'
+    for i in range(data_size):
+        o = Custom(pk = i+1)
+        o.name = str(i)
+        o.test = 'test'
         repo.add(o)
         objects.append(o)
-    object_get_pk = [o.pk for o in repo.get_all({'f1': 0})]
-    assert object_get_pk[0] == objects[0].pk
-    objects_get_pk = [o.pk for o in repo.get_all({'f2': 'test'})]
-    assert objects_get_pk == [o.pk for o in objects]
+    assert repo.get_all({'name': '0'})[0] == objects[0]
+    all = repo.get_all({'test': 'test'})
+    for i in range(data_size):
+        assert all[i] == objects[i]
