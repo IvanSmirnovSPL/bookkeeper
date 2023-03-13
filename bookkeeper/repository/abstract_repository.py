@@ -31,6 +31,8 @@ class AbstractRepository(ABC, Generic[T]):
     update
     delete
     """
+    cls: type
+    fields: dict[str, Any]
 
     @abstractmethod
     def add(self, obj: T) -> int:
